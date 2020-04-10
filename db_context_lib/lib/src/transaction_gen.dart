@@ -6,6 +6,6 @@ class Transaction {
 
 const Transaction transaction = Transaction._();
 
-abstract class Transactional {
-  DbContext get db;
+abstract class Transactional<CONNECTION> {
+  DbContext<CONNECTION> get db;
 }
