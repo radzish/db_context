@@ -88,7 +88,7 @@ class DbContext<CONNECTION> {
 
   CONNECTION get conn => _info?.connection;
 
-  _ConnectionWrapper get _info => Zone.current[_zoneConnectionKey] as _ConnectionWrapper;
+  _ConnectionWrapper<CONNECTION> get _info => Zone.current[_zoneConnectionKey] as _ConnectionWrapper<CONNECTION>;
 }
 
 class _ConnectionWrapper<CONNECTION> {
