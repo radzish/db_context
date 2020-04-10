@@ -17,7 +17,7 @@ abstract class ConnectionManager<CONNECTION> {
 }
 
 class DbContext<CONNECTION> {
-  static const _zoneConnectionKey = "postgres_driver.connection_key";
+  static const _zoneConnectionKey = "db_context.connection_key";
 
   final ConnectionManager<CONNECTION> connectionManager;
 
