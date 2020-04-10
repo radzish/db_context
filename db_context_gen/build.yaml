@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      db_context_gen|transactional_generator:
+        enabled: true
+
+builders:
+  transactional_generator:
+    import: 'package:db_context_gen/builder.dart'
+    builder_factories: ['transactionalGenerator']
+    build_extensions: { '.dart': ['.transactional.g.part'] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ['source_gen|combining_builder']

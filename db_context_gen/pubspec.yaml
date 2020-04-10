@@ -1,0 +1,27 @@
+name: db_context_gen
+description: A starting point for Dart libraries or applications.
+# version: 1.0.0
+# homepage: https://www.example.com
+# author: kernel <email@example.com>
+
+environment:
+  sdk: '>=2.7.0 <3.0.0'
+
+dependencies:
+  build: ^1.2.2
+  analyzer: '>=0.34.0 <0.39.0'
+  source_gen: ^0.9.4+6
+  db_context_lib:
+    git:
+      url: git://github.com/radzish/db_context.git
+      path: db_context_lib
+
+dev_dependencies:
+  pedantic: ^1.9.0
+  build_runner: ^1.7.2
+  build_test: ^0.10.10
+  test: ^1.9.4
+
+dependency_overrides:
+  db_context_lib:
+    path: ../db_context_lib
