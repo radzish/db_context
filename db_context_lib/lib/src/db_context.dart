@@ -24,23 +24,36 @@ class DbContext<CONNECTION> {
   ResourcePool<CONNECTION> _pool;
 
   DbContext(this.connectionManager, {int maxConnections = _defaultMaxConnectionsInPool}) {
-    _pool = ResourcePool<CONNECTION>(maxConnections, () => connectionManager.create());
+    _pool = ResourcePool<CONNECTION>(maxConnections, create);
+  }
+
+  Future<CONNECTION> create() async {
+    final connection = await connectionManager.create();
+    print("connection created: ${connection.hashCode}");
+    return connection;
   }
 
   Future<CONNECTION> open() async {
     var connection = await _pool.get();
     print("connection opened: ${connection.hashCode}");
 
-    if (!connectionManager.isValid(connection)) {
-      await _pool.remove(connection);
+    if (!(await isValid(connection))) {
+      await remove(connection);
       connection = await _pool.get();
     }
 
     return connection;
   }
 
+  Future<bool> isValid(CONNECTION connection) async => connectionManager.isValid(connection);
+
+  Future<void> remove(CONNECTION connection) async {
+    print("connection removed: ${connection.hashCode}");
+    await _pool.remove(connection);
+  }
+
   void close(CONNECTION connection) {
-    print("connection closing: ${connection.hashCode}");
+    print("connection released: ${connection.hashCode}");
     _pool.release(connection);
   }
 
