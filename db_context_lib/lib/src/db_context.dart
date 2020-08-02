@@ -7,6 +7,8 @@ const int _defaultMaxConnectionsInPool = 3;
 abstract class ConnectionManager<CONNECTION> {
   Future<CONNECTION> create();
 
+  Future<void> close(CONNECTION connection);
+
   bool isValid(CONNECTION conn);
 
   Future<void> beginTransaction(CONNECTION conn);
@@ -37,15 +39,21 @@ class DbContext<CONNECTION> {
     var connection = await _pool.get();
     print("connection opened: ${connection.hashCode}");
 
-    if (!(await isValid(connection))) {
+    if (!isValid(connection)) {
+      // making sure connection is closed before removal
+      try {
+        await connectionManager.close(connection);
+      } catch(_) {
+        //
+      }
       await remove(connection);
-      connection = await _pool.get();
+      connection = await open();
     }
 
     return connection;
   }
 
-  Future<bool> isValid(CONNECTION connection) async => connectionManager.isValid(connection);
+  bool isValid(CONNECTION connection) => connectionManager.isValid(connection);
 
   Future<void> remove(CONNECTION connection) async {
     print("connection removed: ${connection.hashCode}");
