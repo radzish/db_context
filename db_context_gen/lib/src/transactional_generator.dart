@@ -9,6 +9,7 @@ import 'package:source_gen/source_gen.dart';
 
 TypeChecker _transactionalClassChecker = TypeChecker.fromRuntime(Transactional);
 TypeChecker _transactionChecker = TypeChecker.fromRuntime(Transaction);
+TypeChecker _futureChecker = TypeChecker.fromRuntime(Future);
 RegExp _privateClassNameRegexp = RegExp(r"_+([^_]+)");
 
 class TransactionalGenerator extends Generator {
@@ -87,7 +88,7 @@ class TransactionalGenerator extends Generator {
 
   ListBuilder<code.Method> _buildTransactionalMethods(ClassElement cls) {
     final suitableMethods = cls.methods
-        .where((method) => method.isPublic && !method.isAbstract && !method.isStatic && method.isAsynchronous);
+        .where((method) => method.isPublic && !method.isAbstract && !method.isStatic && _isAsync(method));
 
     return ListBuilder(
       suitableMethods.map(
@@ -104,6 +105,8 @@ class TransactionalGenerator extends Generator {
       ),
     );
   }
+
+  bool _isAsync(MethodElement method) => _futureChecker.isExactlyType(method.returnType);
 
   code.Reference _buildMethodReturnType(MethodElement method) {
     return code.refer(method.returnType.displayName);
