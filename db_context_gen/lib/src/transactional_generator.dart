@@ -70,6 +70,7 @@ class TransactionalGenerator extends Generator {
     return code.Parameter((b) => b
       ..name = param.name
       ..type = code.refer(param.type.toString())
+      ..defaultTo = param.defaultValueCode != null ? code.refer(param.defaultValueCode).code : null
       ..named = param.isNamed);
   }
 
@@ -87,8 +88,8 @@ class TransactionalGenerator extends Generator {
   }
 
   ListBuilder<code.Method> _buildTransactionalMethods(ClassElement cls) {
-    final suitableMethods = cls.methods
-        .where((method) => method.isPublic && !method.isAbstract && !method.isStatic && _isAsync(method));
+    final suitableMethods =
+        cls.methods.where((method) => method.isPublic && !method.isAbstract && !method.isStatic && _isAsync(method));
 
     return ListBuilder(
       suitableMethods.map(
