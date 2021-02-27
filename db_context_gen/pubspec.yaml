@@ -13,7 +13,7 @@ dependencies:
   source_gen: ^0.9.4+6
   db_context_lib:
     git:
-      url: git://github.com/radzish/db_context.git
+      url: https://github.com/radzish/db_context.git
       path: db_context_lib
 
 dev_dependencies:
