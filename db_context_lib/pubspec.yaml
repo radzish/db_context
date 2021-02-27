@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   resource_pool:
-    git: git://github.com/radzish/resource_pool.git
+    git: https://github.com/radzish/resource_pool.git
 
 dev_dependencies:
   pedantic: ^1.8.0+1
