@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:logging/logging.dart';
 import 'package:resource_pool/resource_pool.dart';
 
 const int _defaultMaxConnectionsInPool = 3;
+
+Logger get _logger => Logger.root;
 
 abstract class ConnectionManager<CONNECTION> {
   Future<CONNECTION> create();
@@ -31,13 +34,13 @@ class DbContext<CONNECTION> {
 
   Future<CONNECTION> create() async {
     final connection = await connectionManager.create();
-    print("connection created: ${connection.hashCode}");
+    _logger.fine("connection created: ${connection.hashCode}");
     return connection;
   }
 
   Future<CONNECTION> open() async {
     var connection = await _pool.get();
-    print("connection opened: ${connection.hashCode}");
+    _logger.fine("connection opened: ${connection.hashCode}");
 
     if (!isValid(connection)) {
       // making sure connection is closed before removal
@@ -56,12 +59,12 @@ class DbContext<CONNECTION> {
   bool isValid(CONNECTION connection) => connectionManager.isValid(connection);
 
   Future<void> remove(CONNECTION connection) async {
-    print("connection removed: ${connection.hashCode}");
+    _logger.fine("connection removed: ${connection.hashCode}");
     await _pool.remove(connection);
   }
 
   void close(CONNECTION connection) {
-    print("connection released: ${connection.hashCode}");
+    _logger.fine("connection released: ${connection.hashCode}");
     _pool.release(connection);
   }
 
