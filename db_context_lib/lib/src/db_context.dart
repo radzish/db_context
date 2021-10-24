@@ -26,7 +26,7 @@ class DbContext<CONNECTION> {
 
   final ConnectionManager<CONNECTION> connectionManager;
 
-  ResourcePool<CONNECTION> _pool;
+  late ResourcePool<CONNECTION> _pool;
 
   DbContext(this.connectionManager, {int maxConnections = _defaultMaxConnectionsInPool}) {
     _pool = ResourcePool<CONNECTION>(maxConnections, create);
@@ -69,8 +69,8 @@ class DbContext<CONNECTION> {
   }
 
   Future<T> executeInReadTransaction<T>(Future<T> Function() block) async {
-    bool connectionExisted = conn != null;
-    final connection = connectionExisted ? conn : await open();
+    final connectionExisted = _resolvedConn != null;
+    final connection = connectionExisted ? _resolvedConn! : await open();
     try {
       if (connectionExisted) {
         return await block();
@@ -80,39 +80,42 @@ class DbContext<CONNECTION> {
       }
     } finally {
       if (!connectionExisted) {
-        await close(connection);
+        close(connection!);
       }
     }
   }
 
   Future<T> executeInWriteTransaction<T>(Future<T> Function() block) async {
     return executeInReadTransaction(() async {
-      bool transactionExisted = _info.inTransaction;
+      final transactionExisted = _info!.inTransaction;
       if (!transactionExisted) {
-        await connectionManager.beginTransaction(conn);
-        _info.inTransaction = true;
+        await connectionManager.beginTransaction(conn!);
+        _info!.inTransaction = true;
       }
       try {
         final result = await block();
 
         if (!transactionExisted) {
-          _info.inTransaction = false;
-          await connectionManager.commitTransaction(conn);
+          _info!.inTransaction = false;
+          await connectionManager.commitTransaction(conn!);
         }
 
         return result;
       } catch (e) {
-        await connectionManager.rollbackTransaction(conn);
-        _info.inTransaction = false;
+        await connectionManager.rollbackTransaction(conn!);
+        _info!.inTransaction = false;
 
         rethrow;
       }
     });
   }
 
-  CONNECTION get conn => _info?.connection;
+  CONNECTION get conn => _info!.connection;
 
-  _ConnectionWrapper<CONNECTION> get _info => Zone.current[_zoneConnectionKey] as _ConnectionWrapper<CONNECTION>;
+  // this is needed for internal usage
+  CONNECTION? get _resolvedConn => _info?.connection;
+
+  _ConnectionWrapper<CONNECTION>? get _info => Zone.current[_zoneConnectionKey] as _ConnectionWrapper<CONNECTION>?;
 }
 
 class _ConnectionWrapper<CONNECTION> {

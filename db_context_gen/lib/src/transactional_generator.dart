@@ -14,7 +14,7 @@ RegExp _privateClassNameRegexp = RegExp(r"_+([^_]+)");
 
 class TransactionalGenerator extends Generator {
   @override
-  FutureOr<String> generate(LibraryReader library, BuildStep buildStep) async {
+  FutureOr<String?> generate(LibraryReader library, BuildStep buildStep) async {
     final transactionalClasses = library.classes.where(_isTransactional).where((cls) => cls.isPrivate);
     if (transactionalClasses.isEmpty) {
       return null;
@@ -51,7 +51,7 @@ class TransactionalGenerator extends Generator {
   }
 
   String _generateMixinName(String name) {
-    return "_\$${_privateClassNameRegexp.firstMatch(name).group(1)}";
+    return "_\$${_privateClassNameRegexp.firstMatch(name)!.group(1)}";
   }
 
   ListBuilder<code.Parameter> _buildMethodRequiredParams(FunctionTypedElement constructor) {
@@ -69,8 +69,8 @@ class TransactionalGenerator extends Generator {
   code.Parameter _buildMethodParam(ParameterElement param) {
     return code.Parameter((b) => b
       ..name = param.name
-      ..type = code.refer(param.type.getDisplayString(withNullability: false))
-      ..defaultTo = param.defaultValueCode != null ? code.refer(param.defaultValueCode).code : null
+      ..type = code.refer(param.type.getDisplayString(withNullability: true))
+      ..defaultTo = param.defaultValueCode != null ? code.refer(param.defaultValueCode!).code : null
       ..named = param.isNamed);
   }
 
@@ -110,12 +110,12 @@ class TransactionalGenerator extends Generator {
   bool _isAsync(MethodElement method) => _futureChecker.isExactlyType(method.returnType);
 
   code.Reference _buildMethodReturnType(MethodElement method) {
-    return code.refer(method.returnType.displayName);
+    return code.refer(method.returnType.getDisplayString(withNullability: true));
   }
 
   code.Code _buildMethodBody(MethodElement method) {
-    final isTransaction =
-        method.metadata.any((annotation) => _transactionChecker.isExactlyType(annotation.computeConstantValue().type));
+    final isTransaction = method.metadata
+        .any((annotation) => _transactionChecker.isExactlyType(annotation.computeConstantValue()!.type!));
 
     final wrapper = isTransaction ? "executeInWriteTransaction" : "executeInReadTransaction";
 

@@ -44,4 +44,9 @@ abstract class _TestService implements Transactional<Connection> {
   Future<void> _futureVoidCall() async {}
 
   Future<void> optionalParamsDefaultValues(String normalParam, {bool lock = true}) async {}
+
+  @transaction
+  Future<void> nullableParamsMethod(String? name, {String? description = "11"}) async {}
+
+  Future<String?> nullableReturnMethod() async {}
 }
